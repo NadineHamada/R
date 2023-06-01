@@ -1,35 +1,71 @@
-# on veut dégager quel sont les composantes fortes de decathlon
-library(factoextra)
-library(FactoMineR)
-data(decathlon)
-str(decathlon)
-summary(decathlon)
-# Avec summary() il dégage une description pour quelle raison :
-# pour donner une idée sur les donnés à netouyer
-# (par exemple il donne combien de valeur manquante pour chaque jeu de donnés)
+data(iris)
+str(iris)
+attach(iris)
+# factor: qualité + +ieurs modalités : 3groupes 
+#verifier corrélations
+summary(aov(Sepal.Length~Species))
+# p-value < 0.05 =>refuser H0 
+# sepal lenth affecte  les modalités de la variable y (types de fleurs)
+summary(aov(Sepal.Width~Species))
 
-# on va travailler sur les individus et les variables actives
-dec.active<-decathlon[,1:10]
- 
-#ACP appliqué pour ce jeu de donnés:
-anal<-PCA(dec.active,scale.unit = T,ncp=5,graph = T, axes=c(1,2))
-# scale.unit = T cad true la standirisation est true tj true
-# ncp=5 nbre de composantes
+summary(aov(Petal.Length~Species))
+# p-value < 0.05 =>refuser H0 
+# petal lenth affecte  les modalités de la variable y (types de fleurs)
 
-anal$eig 
-# si on applique kaiser on prend les 4 premiers components 
-anal$var$coord
-# voir les axes factorielle : 10 parceque on a 10 vars
-fviz_eig(anal)
-# la qualité de ACP KMNO :
+summary(aov(Petal.Width~Species))
+#maintenat on peut faire analyse discriminante 
+
+library(MASS)
 library(psych)
-KMO(dec.active)
-# kmo= 0.6<0.8 et =0.6  donc kaiser est acceptable 
-# Barklette test 
-bartlett.test(dec.active)
-# p-value <  alors refuser ho
+pairs.panels(iris[1:4],gap=0,bg=c("red","green","blue")[iris$species],pch=21)
+# dans le diag sup sont les coefficients de corrélations 
+# il y a corrélations entre x1 et x4
+# il y a corrélations entre x 1et x3
+# il ya des corrélations inqiétante mais pas de probléme 
+# pour faire le test annova, il faut la normalité 
+# dans le diagonale, il y a l'histogramme de x1 qui suit la loi normale 
+lda(Species~.,iris)
+Species
+# on a 1/3 pour group1 1/3 pour group2 et 1/3 pour group3
 
-# Analyse sur variable et analyse sur individue 
-anal$var
-anal$ind
+# LD1 est Z1 
+# LD2 est Z2 
+# on a 2 FCT discrimiant car nbre FCT discrimiant=nbre_model-1 
+# LD1 et LD2 n'ont pas la meme importance, LD1 est plus forte que LD2 ceci est
+# remarqué par proportion of trace LD1 domine largement 
+# proportion of trace LD1 + proportion of trace LD2 = 1
+table(Species)
+as.factor(Species) # rendre qualitative 
+dim(iris)
+res<-lda(Species~.,iris)
+res$svd
+# le code predict va affecter les 150 individus au groupe
+predict(res)
+class
+posterior
+# montre les probabilités que chaque individu appartient aux chaque classe 
+# ici les probabilités sont discriminantes (bon chose)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
